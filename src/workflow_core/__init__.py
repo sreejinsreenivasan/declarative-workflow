@@ -4,6 +4,7 @@ from workflow_core.protocol import NodeProtocol
 from workflow_core.registry import Registry
 from workflow_core.result import NodeError, Result
 from workflow_core.runtime import Runtime
+from workflow_core.store import ExecutionStore, InMemoryStore
 from workflow_core.workflow import Node, Workflow
 
 __all__ = [
@@ -17,4 +18,6 @@ __all__ = [
     "NodeProtocol",
     "Registry",
     "Runtime",
+    "ExecutionStore",
+    "InMemoryStore",
 ]
