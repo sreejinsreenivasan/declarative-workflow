@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Protocol
 
-
 from workflow_core.context import Context
+from workflow_core.processors import delete_record, read_record, write_record
 from workflow_core.result import NodeError, Result
 
 
@@ -25,26 +25,22 @@ class PersistNode:
             return NodeError(code="INVALID_PARAMS", message="'key' is required")
 
         if operation == "write":
-            return await self._write(context, params, key)
+            result = await write_record(self._repo, key, params.get("data_key", "validated"))(context)
+            if isinstance(result, NodeError):
+                return result
+            return Result(output={"persisted": True})
 
         if operation == "read":
-            return await self._read(params, key)
+            output_key = params.get("output_key", "record")
+            result = await read_record(self._repo, key, output_key)(context)
+            if isinstance(result, NodeError):
+                return result
+            return Result(output={output_key: result.data[output_key]})
 
         if operation == "delete":
-            await self._repo.delete(key)
+            result = await delete_record(self._repo, key)(context)
+            if isinstance(result, NodeError):
+                return result
             return Result(output={"deleted": True})
 
         return NodeError(code="INVALID_OPERATION", message=f"Unknown operation '{operation}'")
-
-    async def _write(self, context: Context, params: dict[str, Any], key: str) -> Result:
-        data_key = params.get("data_key", "validated")
-        value = context.data.get(data_key, {})
-        await self._repo.set(key, value)
-        return Result(output={"persisted": True})
-
-    async def _read(self, params: dict[str, Any], key: str) -> Result | NodeError:
-        record = await self._repo.get(key)
-        if record is None:
-            return NodeError(code="NOT_FOUND", message=f"Record '{key}' not found")
-        output_key = params.get("output_key", "record")
-        return Result(output={output_key: record})

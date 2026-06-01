@@ -3,18 +3,18 @@ from __future__ import annotations
 from typing import Any
 
 from workflow_core.context import Context
-from workflow_core.result import Result
+from workflow_core.processors import shape_response
+from workflow_core.result import NodeError, Result
 
 
 class ResponseNode:
-    async def run(self, context: Context, params: dict[str, Any]) -> Result:
-        include: list[str] | None = params.get("include")
-        status: int = params.get("status", 200)
+    async def run(self, context: Context, params: dict[str, Any]) -> Result | NodeError:
+        result = await shape_response(
+            include=params.get("include"),
+            status=params.get("status", 200),
+        )(context)
 
-        data = (
-            {k: v for k, v in context.data.items() if k in include}
-            if include
-            else dict(context.data)
-        )
+        if isinstance(result, NodeError):
+            return result
 
-        return Result(output={"response": {"data": data, "status": status}})
+        return Result(output={"response": result.data["response"]})

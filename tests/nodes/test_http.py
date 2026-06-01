@@ -20,7 +20,7 @@ def mock_response(status_code: int, json_data: dict) -> MagicMock:
 
 
 async def test_successful_get_request():
-    with patch("workflow_core.nodes.http.httpx.AsyncClient") as MockClient:
+    with patch("workflow_core.processors.httpx.AsyncClient") as MockClient:
         mock_client = AsyncMock()
         mock_client.request = AsyncMock(return_value=mock_response(200, {"id": 1}))
         MockClient.return_value.__aenter__ = AsyncMock(return_value=mock_client)
@@ -33,7 +33,7 @@ async def test_successful_get_request():
 
 
 async def test_post_with_body_from_context():
-    with patch("workflow_core.nodes.http.httpx.AsyncClient") as MockClient:
+    with patch("workflow_core.processors.httpx.AsyncClient") as MockClient:
         mock_client = AsyncMock()
         mock_client.request = AsyncMock(return_value=mock_response(201, {"created": True}))
         MockClient.return_value.__aenter__ = AsyncMock(return_value=mock_client)
@@ -50,7 +50,7 @@ async def test_post_with_body_from_context():
 
 
 async def test_custom_response_key():
-    with patch("workflow_core.nodes.http.httpx.AsyncClient") as MockClient:
+    with patch("workflow_core.processors.httpx.AsyncClient") as MockClient:
         mock_client = AsyncMock()
         mock_client.request = AsyncMock(return_value=mock_response(200, {"status": "ok"}))
         MockClient.return_value.__aenter__ = AsyncMock(return_value=mock_client)
@@ -65,7 +65,7 @@ async def test_custom_response_key():
 
 
 async def test_http_4xx_returns_error():
-    with patch("workflow_core.nodes.http.httpx.AsyncClient") as MockClient:
+    with patch("workflow_core.processors.httpx.AsyncClient") as MockClient:
         mock_client = AsyncMock()
         mock_client.request = AsyncMock(return_value=mock_response(404, {}))
         MockClient.return_value.__aenter__ = AsyncMock(return_value=mock_client)
@@ -79,7 +79,7 @@ async def test_http_4xx_returns_error():
 
 
 async def test_http_5xx_returns_error():
-    with patch("workflow_core.nodes.http.httpx.AsyncClient") as MockClient:
+    with patch("workflow_core.processors.httpx.AsyncClient") as MockClient:
         mock_client = AsyncMock()
         mock_client.request = AsyncMock(return_value=mock_response(500, {}))
         MockClient.return_value.__aenter__ = AsyncMock(return_value=mock_client)
@@ -94,7 +94,7 @@ async def test_http_5xx_returns_error():
 async def test_connection_error_returns_error():
     import httpx as _httpx
 
-    with patch("workflow_core.nodes.http.httpx.AsyncClient") as MockClient:
+    with patch("workflow_core.processors.httpx.AsyncClient") as MockClient:
         mock_client = AsyncMock()
         mock_client.request = AsyncMock(side_effect=_httpx.ConnectError("refused"))
         MockClient.return_value.__aenter__ = AsyncMock(return_value=mock_client)
