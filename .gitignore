@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Poetry
+poetry.lock
+
+# Test & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Type checking & linting
+.mypy_cache/
+.ruff_cache/
+
+# Claude Code — local overrides never committed
+CLAUDE.local.md
+.claude/settings.local.json
+
+# OS
+.DS_Store

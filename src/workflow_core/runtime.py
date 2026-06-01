@@ -1,0 +1,95 @@
+from __future__ import annotations
+
+import inspect
+from typing import Any, Awaitable, Callable
+
+from workflow_core.context import Context
+from workflow_core.event import Event, EventType
+from workflow_core.registry import Registry
+from workflow_core.result import NodeError, Result
+from workflow_core.workflow import Workflow
+
+OnEvent = Callable[[Event], Awaitable[None]] | Callable[[Event], None]
+
+
+class Runtime:
+    def __init__(self, workflow: Workflow, registry: Registry) -> None:
+        self.workflow = workflow
+        self.registry = registry
+
+    async def execute(
+        self,
+        execution_id: str,
+        input_data: dict[str, Any] | None = None,
+        on_event: OnEvent | None = None,
+    ) -> Context:
+        context = Context(
+            execution_id=execution_id,
+            workflow_id=self.workflow.id,
+            node=self.workflow.start,
+            data=input_data or {},
+        )
+
+        while context.node is not None:
+            context = await self._step(context, on_event)
+
+        await _emit(on_event, Event(type=EventType.WORKFLOW_COMPLETED, execution_id=execution_id))
+
+        return context
+
+    async def _step(self, context: Context, on_event: OnEvent | None) -> Context:
+        node_id = context.node
+        node_def = self.workflow.nodes[node_id]  # type: ignore[index]
+
+        await _emit(
+            on_event,
+            Event(type=EventType.NODE_STARTED, execution_id=context.execution_id, node_id=node_id),
+        )
+
+        result = await _run(self.registry.resolve(node_def.type), context, node_def.params)
+
+        await _emit(
+            on_event,
+            Event(
+                type=EventType.NODE_COMPLETED,
+                execution_id=context.execution_id,
+                node_id=node_id,
+                data={"transition": result.transition},
+            ),
+        )
+
+        if result.transition not in node_def.transitions:
+            raise RuntimeError(
+                f"node '{node_id}': unknown transition '{result.transition}'"
+            )
+
+        next_node = node_def.transitions[result.transition]
+
+        await _emit(
+            on_event,
+            Event(
+                type=EventType.TRANSITION_SELECTED,
+                execution_id=context.execution_id,
+                node_id=node_id,
+                data={"transition": result.transition, "next": next_node},
+            ),
+        )
+
+        output = result.output if isinstance(result, Result) else {}
+        return context.merge(output).evolve(node=next_node)
+
+
+async def _run(node_cls: type, context: Context, params: dict[str, Any]) -> Result | NodeError:
+    try:
+        return await node_cls().run(context, params)
+    except Exception as exc:
+        return NodeError(code="UNEXPECTED_ERROR", message=str(exc))
+
+
+async def _emit(on_event: OnEvent | None, event: Event) -> None:
+    if on_event is None:
+        return
+    if inspect.iscoroutinefunction(on_event):
+        await on_event(event)
+    else:
+        on_event(event)  # type: ignore[arg-type]

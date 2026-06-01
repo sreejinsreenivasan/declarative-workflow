@@ -1,0 +1,38 @@
+site_name: workflow-core
+site_description: Declarative, pipeline-based workflow runtime for Python web servers
+repo_url: https://github.com/sreejinsreenivasan/declarative-workflow
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Concepts: concepts.md
+  - Guides:
+      - Defining Workflows: guides/defining-workflows.md
+      - Custom Nodes: guides/custom-nodes.md
+      - Error Handling: guides/error-handling.md
+      - Events & Observability: guides/events.md
+  - Reference:
+      - Workflow & Node: reference/workflow.md
+      - Context: reference/context.md
+      - Result & NodeError: reference/result.md
+      - Event: reference/event.md
+      - Runtime: reference/runtime.md
+      - Registry: reference/registry.md
+      - NodeProtocol: reference/protocol.md
+      - Nodes:
+          - form: reference/nodes/form.md
+          - decision: reference/nodes/decision.md
+          - http: reference/nodes/http.md
+          - transform: reference/nodes/transform.md
+          - persist: reference/nodes/persist.md
+          - response: reference/nodes/response.md
+  - Examples:
+      - User Registration: examples/user-registration.md
+      - KYC Verification: examples/kyc-verification.md
