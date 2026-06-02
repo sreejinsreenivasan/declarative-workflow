@@ -37,16 +37,41 @@ def validate_fields(fields: dict[str, Any], source: str = "input") -> Processor:
     """Validate input fields from context.data[source]. Merges 'validated' on success."""
     async def _validate(context: Context) -> Context | NodeError:
         data = context.data.get(source) or {}
+        coerced = {
+            name: _coerce_field(data.get(name), fields[name])
+            for name in fields
+            if name in data
+        }
         errors = {
             name: msg
             for name, rules in fields.items()
-            if (msg := _check_field(data.get(name), rules)) is not None
+            if (msg := _check_field(coerced.get(name), rules)) is not None
         }
         if errors:
             return NodeError(code="VALIDATION_ERROR", message="Validation failed", details=errors)
-        validated = {name: data[name] for name in fields if name in data}
+        validated = coerced
         return context.merge({"validated": validated})
     return _validate
+
+
+def _coerce_field(value: Any, rules: dict[str, Any]) -> Any:
+    """Coerce string values to expected type (e.g., form data '30' → 30)."""
+    if value is None or not isinstance(value, str):
+        return value
+    field_type = rules.get("type")
+    if field_type == "int":
+        try:
+            return int(value)
+        except ValueError:
+            return value
+    if field_type == "float":
+        try:
+            return float(value)
+        except ValueError:
+            return value
+    if field_type == "bool":
+        return value.lower() in ("true", "1", "yes", "on")
+    return value
 
 
 def _check_field(value: Any, rules: dict[str, Any]) -> str | None:

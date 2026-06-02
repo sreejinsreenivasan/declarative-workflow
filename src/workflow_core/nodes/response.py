@@ -17,4 +17,4 @@ class ResponseNode:
         if isinstance(result, NodeError):
             return result
 
-        return Result(output={"response": result.data["response"]})
+        return Result(output={"response": result.data["response"]}, transition="success")
