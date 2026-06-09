@@ -16,6 +16,7 @@ nav:
   - Guides:
       - Defining Workflows: guides/defining-workflows.md
       - Custom Nodes: guides/custom-nodes.md
+      - FastAPI Integration: guides/fastapi-integration.md
       - Error Handling: guides/error-handling.md
       - Events & Observability: guides/events.md
   - Reference:
@@ -26,6 +27,7 @@ nav:
       - Runtime: reference/runtime.md
       - Registry: reference/registry.md
       - NodeProtocol: reference/protocol.md
+      - Processors: reference/processors.md
       - Nodes:
           - form: reference/nodes/form.md
           - decision: reference/nodes/decision.md
