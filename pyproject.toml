@@ -29,6 +29,8 @@ mypy = "^1.0"
 uvicorn = "^0.29"
 fastapi = "^0.115"
 python-multipart = "^0.0.9"
+mkdocs = "^1.5"
+mkdocs-material = "^9.5"
 
 [build-system]
 requires = ["poetry-core"]

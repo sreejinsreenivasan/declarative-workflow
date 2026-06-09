@@ -15,6 +15,9 @@ poetry.lock
 .coverage
 htmlcov/
 
+# Docs build output
+site/
+
 # Type checking & linting
 .mypy_cache/
 .ruff_cache/
