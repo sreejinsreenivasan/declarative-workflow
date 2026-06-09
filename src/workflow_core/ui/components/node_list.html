@@ -1,0 +1,15 @@
+{%- if nodes %}
+<ul class="uk-list uk-list-divider wf-node-list">
+  {%- for nid, nconf in nodes.items() %}
+  <li class="flex items-center gap-2 wf-node-list__item{% if nid == start %} wf-node-list__item--start{% endif %}">
+    {%- if nid == start %}
+    <uk-icon icon="bolt" class="wf-node-start-icon"></uk-icon>
+    {%- endif %}
+    <code class="wf-node-id">{{ nid }}</code>
+    <span class="uk-label wf-node-type">{{ nconf.type if nconf.type is defined else nconf.get('type','') }}</span>
+  </li>
+  {%- endfor %}
+</ul>
+{%- else %}
+<p class="text-sm text-muted-foreground">No nodes yet.</p>
+{%- endif %}

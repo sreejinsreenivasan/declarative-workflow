@@ -24,7 +24,10 @@ import asyncio
 import json
 from typing import Any
 
+import redis.asyncio as aioredis
+
 from workflow_core import Node, Registry, Runtime, Workflow
+from workflow_core.adapters.redis_store import RedisStore
 from workflow_core.context import Context
 from workflow_core.nodes import FormNode, ResponseNode
 from workflow_core.result import NodeError, Result
@@ -169,23 +172,33 @@ def build_registry(repo: UserRepository) -> Registry:
 # Runner
 # ---------------------------------------------------------------------------
 
-async def run(label: str, runtime: Runtime, input_data: dict) -> None:
-    context = await runtime.execute(label, input_data=input_data)
+async def run(label: str, runtime: Runtime, store: RedisStore, input_data: dict) -> None:
+    execution_id = label.replace(" ", "_")
+    context = await runtime.execute(execution_id, input_data=input_data)
+    await store.save(execution_id, context)
     response = context.data.get("response", {})
     print(f"\n── {label}")
-    print(f"   status : {response.get('status')}")
-    print(f"   data   : {json.dumps(response.get('data'), indent=6)}")
+    print(f"   execution_id : {execution_id}")
+    print(f"   status       : {response.get('status')}")
+    print(f"   data         : {json.dumps(response.get('data'), indent=6)}")
 
 
 async def main() -> None:
+    redis_client = aioredis.from_url(
+        "redis://:REDIS_PASSWORD_123@localhost:6379",
+        decode_responses=True,
+    )
+    store = RedisStore(redis_client, ttl=3600)
+
     repo = UserRepository()
     registry = build_registry(repo)
-    runtime = Runtime(CREATE_USER, registry)
+    runtime = Runtime(CREATE_USER, registry, store=store)
 
     # 1. Valid new user
     await run(
         "valid — Alice (admin, 30)",
         runtime,
+        store,
         {"input": {"name": "Alice", "age": 30, "role": "admin"}},
     )
 
@@ -193,6 +206,7 @@ async def main() -> None:
     await run(
         "duplicate — Alice again",
         runtime,
+        store,
         {"input": {"name": "Alice", "age": 30, "role": "admin"}},
     )
 
@@ -200,6 +214,7 @@ async def main() -> None:
     await run(
         "invalid — bad age and unknown role",
         runtime,
+        store,
         {"input": {"name": "Bob", "age": -5, "role": "superuser"}},
     )
 
@@ -207,12 +222,20 @@ async def main() -> None:
     await run(
         "valid — Carol (viewer, 25)",
         runtime,
+        store,
         {"input": {"name": "Carol", "age": 25, "role": "viewer"}},
     )
 
     print(f"\n── repository state")
     for key, user in repo._users.items():
         print(f"   {key}: {user}")
+
+    print(f"\n── redis keys")
+    async for key in redis_client.scan_iter("workflow:context:*"):
+        raw = await redis_client.get(key)
+        print(f"   {key}: {raw}")
+
+    await redis_client.aclose()
 
 
 if __name__ == "__main__":

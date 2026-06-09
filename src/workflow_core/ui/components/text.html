@@ -1,0 +1,9 @@
+{%- set tag_map = {"heading": "h2", "lead": "p", "small": "p", "muted": "p", "code": "code"} -%}
+{%- set cls_map = {
+  "lead":  "text-lg text-muted-foreground",
+  "small": "text-sm",
+  "muted": "text-sm text-muted-foreground",
+} -%}
+{%- set tag = tag_map.get(variant, "p") -%}
+{%- set cls = cls_map.get(variant, "") -%}
+<{{ tag }}{% if cls %} class="{{ cls }}"{% endif %}>{{ content }}</{{ tag }}>

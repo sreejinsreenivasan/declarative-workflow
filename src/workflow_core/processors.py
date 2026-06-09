@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Awaitable, Callable
+from enum import Enum
+from typing import Any, Awaitable, Callable, Protocol
 
 import httpx
 import jinja2
@@ -13,6 +14,41 @@ from workflow_core.result import NodeError
 # ---------------------------------------------------------------------------
 
 Processor = Callable[[Context], Awaitable[Context | NodeError]]
+
+# ---------------------------------------------------------------------------
+# Enums
+# ---------------------------------------------------------------------------
+
+class HttpMethod(str, Enum):
+    GET = "GET"
+    POST = "POST"
+    PUT = "PUT"
+    PATCH = "PATCH"
+    DELETE = "DELETE"
+    HEAD = "HEAD"
+    OPTIONS = "OPTIONS"
+
+
+class Operator(str, Enum):
+    EQ = "eq"
+    NEQ = "neq"
+    GT = "gt"
+    GTE = "gte"
+    LT = "lt"
+    LTE = "lte"
+    IN = "in"
+    NOT_IN = "not_in"
+    EXISTS = "exists"
+    NOT_EXISTS = "not_exists"
+
+# ---------------------------------------------------------------------------
+# Repository protocol
+# ---------------------------------------------------------------------------
+
+class Repository(Protocol):
+    async def get(self, key: str) -> dict[str, Any] | None: ...  # values are caller-defined
+    async def set(self, key: str, value: dict[str, Any]) -> None: ...  # values are caller-defined
+    async def delete(self, key: str) -> None: ...
 
 # ---------------------------------------------------------------------------
 # Combinator
@@ -33,7 +69,7 @@ def pipe(*processors: Processor) -> Processor:
 # Validation
 # ---------------------------------------------------------------------------
 
-def validate_fields(fields: dict[str, Any], source: str = "input") -> Processor:
+def validate_fields(fields: dict[str, Any], source: str = "input") -> Processor:  # rule specs are heterogeneous
     """Validate input fields from context.data[source]. Merges 'validated' on success."""
     async def _validate(context: Context) -> Context | NodeError:
         data = context.data.get(source) or {}
@@ -54,7 +90,7 @@ def validate_fields(fields: dict[str, Any], source: str = "input") -> Processor:
     return _validate
 
 
-def _coerce_field(value: Any, rules: dict[str, Any]) -> Any:
+def _coerce_field(value: Any, rules: dict[str, Any]) -> Any:  # value/return: unknown type from form data or pre-typed input; rules: heterogeneous spec
     """Coerce string values to expected type (e.g., form data '30' → 30)."""
     if value is None or not isinstance(value, str):
         return value
@@ -74,7 +110,7 @@ def _coerce_field(value: Any, rules: dict[str, Any]) -> Any:
     return value
 
 
-def _check_field(value: Any, rules: dict[str, Any]) -> str | None:
+def _check_field(value: Any, rules: dict[str, Any]) -> str | None:  # value: unknown type; rules: heterogeneous spec
     if value is None:
         return "required" if rules.get("required", True) else None
     field_type = rules.get("type")
@@ -95,7 +131,7 @@ def _check_field(value: Any, rules: dict[str, Any]) -> str | None:
     return None
 
 
-def _check_type(value: Any, expected: str) -> bool:
+def _check_type(value: Any, expected: str) -> bool:  # value: type being checked at runtime
     return {
         "str":   lambda v: isinstance(v, str),
         "int":   lambda v: isinstance(v, int) and not isinstance(v, bool),
@@ -107,21 +143,21 @@ def _check_type(value: Any, expected: str) -> bool:
 # Condition evaluation
 # ---------------------------------------------------------------------------
 
-_OPERATORS: dict[str, Any] = {
-    "eq":         lambda a, b: a == b,
-    "neq":        lambda a, b: a != b,
-    "gt":         lambda a, b: a > b,
-    "gte":        lambda a, b: a >= b,
-    "lt":         lambda a, b: a < b,
-    "lte":        lambda a, b: a <= b,
-    "in":         lambda a, b: a in b,
-    "not_in":     lambda a, b: a not in b,
-    "exists":     lambda a, _: a is not None,
-    "not_exists": lambda a, _: a is None,
+_OPERATORS: dict[Operator, Callable[[Any, Any], bool]] = {  # Any: comparison values are caller-defined
+    Operator.EQ:         lambda a, b: a == b,
+    Operator.NEQ:        lambda a, b: a != b,
+    Operator.GT:         lambda a, b: a > b,
+    Operator.GTE:        lambda a, b: a >= b,
+    Operator.LT:         lambda a, b: a < b,
+    Operator.LTE:        lambda a, b: a <= b,
+    Operator.IN:         lambda a, b: a in b,
+    Operator.NOT_IN:     lambda a, b: a not in b,
+    Operator.EXISTS:     lambda a, _: a is not None,
+    Operator.NOT_EXISTS: lambda a, _: a is None,
 }
 
 
-def check_condition(key: str, operator: str = "eq", value: Any = None) -> Processor:
+def check_condition(key: str, operator: Operator = Operator.EQ, value: Any = None) -> Processor:  # value: compared against caller-defined context data
     """Evaluate a condition against context.data[key]. Merges '_matched' bool."""
     async def _check(context: Context) -> Context | NodeError:
         if operator not in _OPERATORS:
@@ -136,7 +172,7 @@ def check_condition(key: str, operator: str = "eq", value: Any = None) -> Proces
 # ---------------------------------------------------------------------------
 
 def call_http(
-    method: str,
+    method: HttpMethod,
     url: str,
     body_key: str | None = None,
     response_key: str = "http_response",
@@ -182,8 +218,8 @@ def map_fields(mapping: dict[str, str]) -> Processor:
     return _map
 
 
-def _resolve_path(data: dict[str, Any], path: str) -> Any:
-    value: Any = data
+def _resolve_path(data: dict[str, Any], path: str) -> Any:  # data/return: context data is a heterogeneous map
+    value: Any = data  # traversal cursor; type narrows as we descend into nested dicts
     for part in path.split("."):
         if not isinstance(value, dict):
             return None
@@ -194,7 +230,7 @@ def _resolve_path(data: dict[str, Any], path: str) -> Any:
 # Persistence
 # ---------------------------------------------------------------------------
 
-def write_record(repo: Any, key: str, data_key: str = "validated") -> Processor:
+def write_record(repo: Repository, key: str, data_key: str = "validated") -> Processor:
     """Write context.data[data_key] to storage at key."""
     async def _write(context: Context) -> Context | NodeError:
         await repo.set(key, context.data.get(data_key, {}))
@@ -202,7 +238,7 @@ def write_record(repo: Any, key: str, data_key: str = "validated") -> Processor:
     return _write
 
 
-def read_record(repo: Any, key: str, output_key: str = "record") -> Processor:
+def read_record(repo: Repository, key: str, output_key: str = "record") -> Processor:
     """Read from storage at key. NodeError(NOT_FOUND) if absent."""
     async def _read(context: Context) -> Context | NodeError:
         record = await repo.get(key)
@@ -212,7 +248,7 @@ def read_record(repo: Any, key: str, output_key: str = "record") -> Processor:
     return _read
 
 
-def delete_record(repo: Any, key: str) -> Processor:
+def delete_record(repo: Repository, key: str) -> Processor:
     """Delete record from storage at key."""
     async def _delete(context: Context) -> Context | NodeError:
         await repo.delete(key)
@@ -240,7 +276,7 @@ def render_template(
     env: jinja2.Environment,
     template: str,
     partial: str | None = None,
-    fields: dict[str, Any] | None = None,
+    fields: dict[str, Any] | None = None,  # template context: caller-defined key/value pairs
     errors: dict[str, str] | None = None,
 ) -> Processor:
     """Render a Jinja2 template. Uses partial when is_htmx. Merges 'html'."""

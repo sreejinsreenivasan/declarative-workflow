@@ -1,0 +1,6 @@
+<div class="uk-card uk-card-body mb-4">
+  {%- if header_html %}
+  <div class="uk-card-header -mx-6 -mt-6 mb-6 px-6 py-4">{{ header_html | safe }}</div>
+  {%- endif %}
+  {{ body_html | safe }}
+</div>

@@ -82,6 +82,8 @@ A PR with new logic and no prior failing test does not follow TDD — send it ba
 - Public API schemas, node configs, and domain entities use `BaseModel`
 - Internal execution state (no public surface) uses `dataclass`
 - No raw `dict` flows across layer boundaries
+- Public functions never return `dict[str, Any]` — always return a typed `BaseModel`
+- `Any` is a last resort; every use requires an inline comment explaining why no concrete type exists
 
 ---
 
@@ -95,17 +97,39 @@ overwrite keys set by earlier nodes.
 
 ---
 
-### 6. Enums Over Magic Strings
+### 6. Prefer the Typed Ecosystem
 
-All node types, execution statuses, transition outcomes, and error codes are enums.
+Every value that belongs to a fixed set must use an enum or a typed model — not a plain `str`, `int`, or `dict`.
+
+This applies to:
+- Node types, execution statuses, transition outcomes, error codes
+- UI component types, style variants, button sizes, input types
+- Any parameter or field whose valid values can be enumerated
+
+```python
+# correct — enum for a fixed set of variants
+class ButtonVariant(str, Enum):
+    PRIMARY = "primary"
+    DESTRUCTIVE = "destructive"
+    GHOST = "ghost"
+
+def button(text: str, *, variant: ButtonVariant = ButtonVariant.PRIMARY) -> ButtonComponent: ...
+
+# wrong — open string leaks the constraint into caller code
+def button(text: str, *, variant: str = "primary") -> dict[str, Any]: ...
+```
+
+Collections that key or branch on a type value must use the enum as the key — never a bare string literal:
 
 ```python
 # correct
-if result.status == NodeStatus.FAILED:
+_FIELD_TYPES: frozenset[ComponentType] = frozenset({ComponentType.INPUT, ComponentType.SELECT})
 
 # wrong
-if result.status == "failed":
+_FIELD_TYPES = {"input", "select"}
 ```
+
+Use `str`-based enums (`class Foo(str, Enum)`) so values remain JSON-serialisable without extra conversion.
 
 ---
 
@@ -190,6 +214,9 @@ Before marking a PR ready:
 - [ ] No blocking I/O in async paths
 - [ ] Audit logging present for state transitions
 - [ ] No hardcoded secrets, URLs, or magic strings
+- [ ] No `-> dict[str, Any]` on public functions — typed `BaseModel` returned instead
+- [ ] No plain `str` parameter where an enum covers a fixed set of values
+- [ ] No `Any` without an inline comment explaining why no concrete type fits
 - [ ] Structured `WorkflowError` with `code`, `message`, `context`
 - [ ] `ruff`, `black`, `isort`, `mypy` pass clean
 - [ ] `core/` imports nothing from `nodes/` or `adapters/`

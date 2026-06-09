@@ -1,0 +1,5 @@
+<div class="uk-grid uk-grid-medium" uk-grid>
+  {%- for col_html, width in columns %}
+  <div class="{{ width }}">{{ col_html | safe }}</div>
+  {%- endfor %}
+</div>

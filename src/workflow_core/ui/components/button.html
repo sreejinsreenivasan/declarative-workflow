@@ -1,0 +1,18 @@
+{%- set cls_map = {
+  "primary":     "uk-btn-primary",
+  "secondary":   "uk-btn-secondary",
+  "destructive": "uk-btn-destructive",
+  "danger":      "uk-btn-destructive",
+  "ghost":       "uk-btn-ghost",
+  "text":        "uk-btn-text",
+  "link":        "uk-btn-link",
+} -%}
+<button
+  type="{{ button_type | default('submit') }}"
+  class="uk-btn {{ cls_map.get(variant, 'uk-btn-default') }}{% if size %} uk-btn-{{ size }}{% endif %}"
+  {%- if name %} name="{{ name }}"{% endif %}
+  {%- if value %} value="{{ value }}"{% endif %}
+>
+  {%- if icon %}<uk-icon icon="{{ icon }}"></uk-icon> {% endif -%}
+  {{ text }}
+</button>

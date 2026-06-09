@@ -1,18 +1,16 @@
 from __future__ import annotations
 
 import inspect
-from typing import TYPE_CHECKING, Any, Awaitable, Callable
+from typing import TYPE_CHECKING, Any
 
 from workflow_core.context import Context
-from workflow_core.event import Event, EventType
+from workflow_core.event import Event, EventType, OnEvent
 from workflow_core.registry import Registry
 from workflow_core.result import NodeError, Result
 from workflow_core.workflow import Workflow
 
 if TYPE_CHECKING:
     from workflow_core.store import ExecutionStore
-
-OnEvent = Callable[[Event], Awaitable[None]] | Callable[[Event], None]
 
 _DEFAULT_SUSPEND_ON: frozenset[str] = frozenset({"render", "error"})
 

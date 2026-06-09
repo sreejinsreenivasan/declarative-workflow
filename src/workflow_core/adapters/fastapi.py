@@ -110,7 +110,7 @@ def _html_or_json(context: Context) -> Response:
     return HTMLResponse(content=context.data.get("html", ""))
 
 
-def _request_meta(request: Request, method: str) -> dict:
+def _request_meta(request: Request, method: str) -> dict[str, dict[str, str | bool]]:
     return {
         "request": {
             "method": method,

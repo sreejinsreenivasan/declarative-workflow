@@ -1,0 +1,7 @@
+<ol class="uk-breadcrumb wf-step-progress">
+  {%- for step in steps %}
+  <li class="wf-step{% if loop.index0 == active %} wf-step--active{% elif loop.index0 < active %} wf-step--done{% endif %}">
+    <span>{{ step }}</span>
+  </li>
+  {%- endfor %}
+</ol>

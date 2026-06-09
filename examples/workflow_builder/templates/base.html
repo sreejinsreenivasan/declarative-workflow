@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" class="uk-theme-zinc uk-radii-md uk-shadows-sm uk-font-sm">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workflow Builder</title>
+
+  <!-- Franken UI -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/franken-ui@next/dist/css/core.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/franken-ui@next/dist/css/utilities.min.css" />
+
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@2.0.0/dist/htmx.min.js"></script>
+
+  <!-- Dark mode — reads preference from localStorage or system -->
+  <script>
+    const __F__ = JSON.parse(localStorage.getItem("__FRANKEN__") || "{}");
+    const html = document.documentElement;
+    if (__F__.mode === "dark" || (!__F__.mode && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      html.classList.add("dark");
+    }
+    if (__F__.theme)   html.classList.add(__F__.theme);
+    if (__F__.radii)   html.classList.replace("uk-radii-md",  __F__.radii);
+    if (__F__.shadows) html.classList.replace("uk-shadows-sm", __F__.shadows);
+  </script>
+
+  <!--
+    Theme hook — add your CSS here or link an external stylesheet.
+
+    Semantic wf-* classes exposed for theming:
+      .wf-step-progress        breadcrumb ol wrapping step items
+      .wf-step                 a step li
+      .wf-step--active         current step
+      .wf-step--done           completed step
+      .wf-badge                uk-label used as step chip
+      .wf-badge--active        active chip variant
+      .wf-form-actions         flex row of form submit buttons
+      .wf-node-list            ul wrapping node rows
+      .wf-node-list__item      a node row li
+      .wf-node-list__item--start  the start node row
+      .wf-node-start-icon      icon in start node row
+      .wf-node-id              <code> for node ID
+      .wf-node-type            uk-label for node type tag
+      .wf-code-block           <pre> for JSON / code preview
+      .wf-monospace            textarea with monospace font
+      .htmx-indicator          spinner (hidden; visible during HTMX requests)
+  -->
+</head>
+<body class="bg-background text-foreground min-h-screen">
+
+<nav class="uk-navbar-container" data-uk-navbar>
+  <div class="container mx-auto">
+    <div class="uk-navbar-left">
+      <a class="uk-navbar-item uk-logo" href="/new">Workflow Builder</a>
+    </div>
+  </div>
+</nav>
+
+<main class="container mx-auto py-8 px-4">
+  <div id="content">
+    {{ content | safe }}
+  </div>
+</main>
+
+<script type="module" src="https://cdn.jsdelivr.net/npm/franken-ui@next/dist/js/core.iife.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/franken-ui@next/dist/js/icon.iife.js"></script>
+
+</body>
+</html>

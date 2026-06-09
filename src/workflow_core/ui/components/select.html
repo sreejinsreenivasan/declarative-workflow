@@ -1,0 +1,16 @@
+<div class="space-y-1.5">
+  {%- if label %}
+  <label class="text-sm font-medium" for="{{ name }}">{{ label }}</label>
+  {%- endif %}
+  <select
+    id="{{ name }}"
+    class="uk-select{% if error %} uk-form-destructive{% endif %}"
+    name="{{ name }}"
+    {%- if required %} required{% endif %}
+  >
+    {%- for value, display in options %}
+    <option value="{{ value }}"{% if not value %} disabled selected{% endif %}>{{ display }}</option>
+    {%- endfor %}
+  </select>
+  {%- if error %}<p class="text-sm text-destructive">{{ error }}</p>{% endif %}
+</div>

@@ -1,0 +1,22 @@
+<form
+  method="POST"
+  action="/{{ execution_id }}"
+  hx-post="/{{ execution_id }}"
+  hx-target="{{ hx_target | default('#content') }}"
+  hx-swap="{{ hx_swap | default('innerHTML') }}"
+  hx-indicator="#{{ indicator_id | default('spinner') }}"
+  class="space-y-4"
+>
+  {{ fields_html | safe }}
+
+  {%- if error_summary %}
+  <div class="uk-alert uk-alert-destructive" data-uk-alert>
+    <p>Please fix the errors above.</p>
+  </div>
+  {%- endif %}
+
+  <div class="flex flex-wrap gap-2 wf-form-actions">
+    {{ actions_html | safe }}
+    <span id="{{ indicator_id | default('spinner') }}" class="htmx-indicator" data-uk-spinner="ratio: 0.6"></span>
+  </div>
+</form>
