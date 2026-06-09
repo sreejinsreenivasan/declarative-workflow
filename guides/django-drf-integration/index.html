@@ -1,0 +1,2066 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Declarative, pipeline-based workflow runtime for Python web servers">
+      
+      
+      
+      
+        <link rel="prev" href="../fastapi-integration/">
+      
+      
+        <link rel="next" href="../error-handling/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Django + DRF - workflow-core</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#django-rest-framework-integration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="workflow-core" class="md-header__button md-logo" aria-label="workflow-core" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            workflow-core
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Django + DRF
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/sreejinsreenivasan/declarative-workflow" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="workflow-core" class="md-nav__button md-logo" aria-label="workflow-core" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    workflow-core
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/sreejinsreenivasan/declarative-workflow" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../defining-workflows/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Defining Workflows
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../custom-nodes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Nodes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../fastapi-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Django + DRF
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Django + DRF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Concepts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-viewset-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic ViewSet Integration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#suspendresume-with-drf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Suspend/Resume with DRF
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#combining-serializers-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combining Serializers + Workflows
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication &amp; Permissions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#real-world-example-kyc-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-World Example: KYC Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pagination-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pagination &amp; Filtering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../error-handling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Error Handling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events & Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflow & Node
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/context/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Context
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/result/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Result & NodeError
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/event/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/runtime/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Registry
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/protocol/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NodeProtocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/processors/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Processors
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_9" id="__nav_5_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nodes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Nodes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/nodes/form/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    form
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/nodes/decision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    decision
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/nodes/http/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    http
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/nodes/transform/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    transform
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/nodes/persist/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    persist
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/nodes/response/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    response
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/nodes/ui/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ui
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/user-registration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Registration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/kyc-verification/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    KYC Verification
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Concepts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-viewset-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic ViewSet Integration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#suspendresume-with-drf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Suspend/Resume with DRF
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#combining-serializers-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Combining Serializers + Workflows
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication &amp; Permissions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#real-world-example-kyc-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Real-World Example: KYC Verification
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pagination-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pagination &amp; Filtering
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production Setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="django-rest-framework-integration">Django REST Framework Integration</h1>
+<p>Use workflow-core for orchestration in Django REST Framework applications. While DRF handles REST conventions (serialization, authentication, permissions), workflow-core handles complex business logic and multi-step processes.</p>
+<h2 id="installation">Installation</h2>
+<pre><code class="language-bash">pip install 'workflow-core[django]' djangorestframework
+</code></pre>
+<h2 id="core-concepts">Core Concepts</h2>
+<p><strong>DRF handles:</strong> REST concerns (serialization, auth, permissions, status codes)</p>
+<p><strong>workflow-core handles:</strong> Business logic orchestration (validation chains, state machines, suspend/resume)</p>
+<pre><code class="language-python"># Good separation:
+# - DRF ViewSet: HTTP layer, authentication, response formatting
+# - workflow-core Runtime: business logic, data flow, persistence
+</code></pre>
+<h2 id="basic-viewset-integration">Basic ViewSet Integration</h2>
+<p>Create a ViewSet that executes workflows:</p>
+<pre><code class="language-python">from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from workflow_core import Runtime, Workflow, Registry
+
+class UserViewSet(viewsets.ViewSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.runtime = Runtime(CREATE_USER_WORKFLOW, self.get_registry())
+
+    def create(self, request):
+        &quot;&quot;&quot;POST /users/ - Create user&quot;&quot;&quot;
+        context = self.runtime.execute(
+            f&quot;user-{uuid4()}&quot;,
+            input_data={&quot;input&quot;: request.data},
+        )
+        response = context.data.get(&quot;response&quot;, {})
+        return Response(
+            response.get(&quot;data&quot;, {}),
+            status=response.get(&quot;status&quot;, 200),
+        )
+
+    @staticmethod
+    def get_registry():
+        registry = Registry()
+        registry.register(&quot;form&quot;)(FormNode)
+        registry.register(&quot;response&quot;)(ResponseNode)
+        return registry
+
+urlpatterns = [
+    path(&quot;api/users/&quot;, UserViewSet.as_view({&quot;post&quot;: &quot;create&quot;})),
+]
+</code></pre>
+<h2 id="suspendresume-with-drf">Suspend/Resume with DRF</h2>
+<p>For multi-step workflows (e.g., form submission, confirmation, processing):</p>
+<pre><code class="language-python">from workflow_core import InMemoryStore
+
+class SignupViewSet(viewsets.ViewSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.store = InMemoryStore()  # Use RedisStore in production
+        self.runtime = Runtime(SIGNUP_WORKFLOW, self.get_registry(), store=self.store)
+
+    def list(self, request):
+        &quot;&quot;&quot;GET /signup/ - Start new signup&quot;&quot;&quot;
+        execution_id = str(uuid4())
+        context = self.runtime.execute(execution_id, input_data={})
+        # Client stores execution_id for next step
+        return Response({
+            &quot;execution_id&quot;: execution_id,
+            &quot;html&quot;: context.data.get(&quot;html&quot;, &quot;&quot;),
+        })
+
+    def create(self, request):
+        &quot;&quot;&quot;POST /signup/ - Submit signup form&quot;&quot;&quot;
+        execution_id = request.data.get(&quot;execution_id&quot;)
+        if not execution_id:
+            return Response(
+                {&quot;error&quot;: &quot;execution_id required&quot;},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            context = self.runtime.resume(
+                execution_id,
+                input_data={&quot;input&quot;: request.data},
+            )
+        except RuntimeError:
+            return Response(
+                {&quot;error&quot;: &quot;Signup session expired&quot;},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if &quot;response&quot; in context.data:
+            # Workflow completed
+            return Response(context.data[&quot;response&quot;][&quot;data&quot;])
+        else:
+            # Workflow suspended (re-render form)
+            return Response({&quot;html&quot;: context.data.get(&quot;html&quot;, &quot;&quot;)})
+
+urlpatterns = [
+    path(&quot;api/signup/&quot;, SignupViewSet.as_view({
+        &quot;get&quot;: &quot;list&quot;,
+        &quot;post&quot;: &quot;create&quot;,
+    })),
+]
+</code></pre>
+<h2 id="combining-serializers-workflows">Combining Serializers + Workflows</h2>
+<p>Use DRF serializers for REST concerns, workflows for orchestration:</p>
+<pre><code class="language-python">from rest_framework import serializers
+from workflow_core.nodes import FormNode
+
+class UserSerializer(serializers.Serializer):
+    &quot;&quot;&quot;REST serialization for API docs, pagination, etc.&quot;&quot;&quot;
+    name = serializers.CharField(max_length=100)
+    email = serializers.EmailField()
+    age = serializers.IntegerField(min_value=0)
+
+class UserViewSet(viewsets.ViewSet):
+    def create(self, request):
+        &quot;&quot;&quot;POST /users/ - Create user&quot;&quot;&quot;
+        # Validate request with DRF serializer
+        serializer = UserSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Pass validated data to workflow
+        context = self.runtime.execute(
+            f&quot;user-{uuid4()}&quot;,
+            input_data={&quot;input&quot;: serializer.validated_data},
+        )
+        response = context.data.get(&quot;response&quot;, {})
+        return Response(
+            response.get(&quot;data&quot;, {}),
+            status=response.get(&quot;status&quot;, 201),
+        )
+</code></pre>
+<p><strong>When to use each:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Validate request structure</td>
+<td>DRF Serializer</td>
+</tr>
+<tr>
+<td>Validate business rules</td>
+<td>workflow FormNode</td>
+</tr>
+<tr>
+<td>Multi-step process</td>
+<td>workflow Nodes</td>
+</tr>
+<tr>
+<td>Authentication/permissions</td>
+<td>DRF Permissions</td>
+</tr>
+<tr>
+<td>Pagination, filtering</td>
+<td>DRF Pagination</td>
+</tr>
+<tr>
+<td>Complex orchestration</td>
+<td>workflow Runtime</td>
+</tr>
+</tbody>
+</table>
+<h2 id="authentication-permissions">Authentication &amp; Permissions</h2>
+<p>Workflows run <strong>after</strong> DRF's authentication/permission layer:</p>
+<pre><code class="language-python">from rest_framework.permissions import IsAuthenticated
+
+class SecureWorkflowViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request):
+        &quot;&quot;&quot;Only authenticated users can start workflows&quot;&quot;&quot;
+        # request.user is available here
+        context = self.runtime.execute(
+            f&quot;user-{request.user.id}-{uuid4()}&quot;,
+            input_data={
+                &quot;input&quot;: request.data,
+                &quot;user_id&quot;: request.user.id,  # Pass to workflow
+            },
+        )
+        return Response(...)
+</code></pre>
+<p>Workflows can access user context:</p>
+<pre><code class="language-python">class CheckOwnershipNode:
+    async def run(self, context, params):
+        user_id = context.data.get(&quot;user_id&quot;)
+        resource_id = context.data.get(&quot;resource_id&quot;)
+
+        if not user_owns_resource(user_id, resource_id):
+            return NodeError(code=&quot;FORBIDDEN&quot;, message=&quot;Not resource owner&quot;)
+
+        return Result(transition=&quot;allowed&quot;)
+</code></pre>
+<h2 id="error-handling">Error Handling</h2>
+<p>Workflows return structured errors:</p>
+<pre><code class="language-python">class CreateResourceViewSet(viewsets.ViewSet):
+    def create(self, request):
+        context = self.runtime.execute(
+            f&quot;resource-{uuid4()}&quot;,
+            input_data={&quot;input&quot;: request.data},
+        )
+
+        response = context.data.get(&quot;response&quot;)
+        if not response:
+            # Workflow suspended (e.g., needs confirmation)
+            return Response(context.data.get(&quot;html&quot;, &quot;&quot;))
+
+        if response.get(&quot;status&quot;) &gt;= 400:
+            # Workflow returned error
+            return Response(
+                response.get(&quot;data&quot;, {}),
+                status=response.get(&quot;status&quot;),
+            )
+
+        # Success
+        return Response(response.get(&quot;data&quot;, {}), status=response.get(&quot;status&quot;))
+</code></pre>
+<h2 id="real-world-example-kyc-verification">Real-World Example: KYC Verification</h2>
+<p>Multi-step workflow: form → validation → API call → decision → result</p>
+<p><strong>Workflow definition:</strong></p>
+<pre><code class="language-python">KYC_WORKFLOW = Workflow(
+    id=&quot;kyc_verify&quot;,
+    start=&quot;collect&quot;,
+    nodes={
+        &quot;collect&quot;: Node(
+            type=&quot;form&quot;,
+            params={
+                &quot;fields&quot;: {
+                    &quot;full_name&quot;: {&quot;type&quot;: &quot;str&quot;, &quot;required&quot;: True},
+                    &quot;ssn&quot;: {&quot;type&quot;: &quot;str&quot;, &quot;required&quot;: True, &quot;max_length&quot;: 11},
+                    &quot;dob&quot;: {&quot;type&quot;: &quot;str&quot;, &quot;required&quot;: True},  # ISO date
+                }
+            },
+            transitions={&quot;success&quot;: &quot;verify&quot;, &quot;failure&quot;: &quot;error&quot;},
+        ),
+        &quot;verify&quot;: Node(
+            type=&quot;http&quot;,
+            params={
+                &quot;method&quot;: &quot;POST&quot;,
+                &quot;url&quot;: &quot;https://kyc-api.example.com/verify&quot;,
+                &quot;body_key&quot;: &quot;validated&quot;,
+                &quot;response_key&quot;: &quot;kyc_result&quot;,
+            },
+            transitions={&quot;success&quot;: &quot;check_risk&quot;, &quot;failure&quot;: &quot;error&quot;},
+        ),
+        &quot;check_risk&quot;: Node(
+            type=&quot;decision&quot;,
+            params={
+                &quot;key&quot;: &quot;kyc_result.risk_score&quot;,
+                &quot;operator&quot;: &quot;lt&quot;,
+                &quot;value&quot;: 50,
+            },
+            transitions={&quot;true&quot;: &quot;approved&quot;, &quot;false&quot;: &quot;manual_review&quot;},
+        ),
+        &quot;approved&quot;: Node(
+            type=&quot;response&quot;,
+            params={&quot;status&quot;: 200, &quot;include&quot;: [&quot;kyc_result&quot;]},
+            transitions={&quot;success&quot;: None},
+        ),
+        &quot;manual_review&quot;: Node(
+            type=&quot;response&quot;,
+            params={&quot;status&quot;: 202, &quot;include&quot;: [&quot;kyc_result&quot;]},  # 202 Accepted
+            transitions={&quot;success&quot;: None},
+        ),
+        &quot;error&quot;: Node(
+            type=&quot;response&quot;,
+            params={&quot;status&quot;: 400},
+            transitions={&quot;success&quot;: None},
+        ),
+    },
+)
+</code></pre>
+<p><strong>DRF ViewSet:</strong></p>
+<pre><code class="language-python">from rest_framework import viewsets, status
+from rest_framework.response import Response
+from uuid import uuid4
+
+class KYCViewSet(viewsets.ViewSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        registry = Registry()
+        registry.register(&quot;form&quot;)(FormNode)
+        registry.register(&quot;http&quot;)(HTTPNode)
+        registry.register(&quot;decision&quot;)(DecisionNode)
+        registry.register(&quot;response&quot;)(ResponseNode)
+        self.runtime = Runtime(KYC_WORKFLOW, registry)
+
+    def create(self, request):
+        &quot;&quot;&quot;POST /kyc/ - Start KYC verification&quot;&quot;&quot;
+        execution_id = f&quot;kyc-{request.user.id}-{uuid4()}&quot;
+
+        context = self.runtime.execute(
+            execution_id,
+            input_data={&quot;input&quot;: request.data},
+        )
+
+        response_data = context.data.get(&quot;response&quot;, {})
+        return Response(
+            response_data.get(&quot;data&quot;, {}),
+            status=response_data.get(&quot;status&quot;, 200),
+        )
+
+urlpatterns = [
+    path(&quot;api/kyc/&quot;, KYCViewSet.as_view({&quot;post&quot;: &quot;create&quot;})),
+]
+</code></pre>
+<p><strong>Usage:</strong></p>
+<pre><code class="language-bash"># Start KYC verification
+curl -X POST http://localhost:8000/api/kyc/ \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;full_name&quot;: &quot;Alice Smith&quot;,
+    &quot;ssn&quot;: &quot;123-45-6789&quot;,
+    &quot;dob&quot;: &quot;1990-01-15&quot;
+  }'
+
+# Response:
+# {
+#   &quot;kyc_result&quot;: {
+#     &quot;status&quot;: &quot;verified&quot;,
+#     &quot;risk_score&quot;: 35,
+#     &quot;country&quot;: &quot;US&quot;
+#   }
+# }
+</code></pre>
+<h2 id="pagination-filtering">Pagination &amp; Filtering</h2>
+<p>Workflows don't handle pagination. For listing, use DRF's pagination:</p>
+<pre><code class="language-python">from rest_framework.pagination import PageNumberPagination
+
+class ExecutionListViewSet(viewsets.ViewSet):
+    pagination_class = PageNumberPagination
+
+    def list(self, request):
+        &quot;&quot;&quot;GET /executions/ - List executions&quot;&quot;&quot;
+        # Fetch from store or database
+        executions = Execution.objects.filter(user=request.user)
+
+        paginator = self.pagination_class()
+        result_page = paginator.paginate_queryset(executions, request)
+
+        return paginator.get_paginated_response([
+            {
+                &quot;id&quot;: ex.execution_id,
+                &quot;workflow&quot;: ex.workflow_id,
+                &quot;status&quot;: ex.status,
+                &quot;created_at&quot;: ex.created_at,
+            }
+            for ex in result_page
+        ])
+</code></pre>
+<h2 id="testing">Testing</h2>
+<p>Test workflows and DRF views together:</p>
+<pre><code class="language-python">from rest_framework.test import APITestCase
+
+class KYCTestCase(APITestCase):
+    def test_kyc_approved(self):
+        &quot;&quot;&quot;Test KYC with low-risk user&quot;&quot;&quot;
+        response = self.client.post(&quot;/api/kyc/&quot;, {
+            &quot;full_name&quot;: &quot;Alice Smith&quot;,
+            &quot;ssn&quot;: &quot;123-45-6789&quot;,
+            &quot;dob&quot;: &quot;1990-01-15&quot;,
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(&quot;kyc_result&quot;, response.data)
+
+    def test_kyc_manual_review(self):
+        &quot;&quot;&quot;Test KYC with high-risk user&quot;&quot;&quot;
+        # Mock HTTP response with high risk score
+        with patch(&quot;httpx.AsyncClient.request&quot;) as mock_req:
+            mock_req.return_value.json.return_value = {
+                &quot;risk_score&quot;: 75,
+            }
+            response = self.client.post(&quot;/api/kyc/&quot;, {...})
+            self.assertEqual(response.status_code, 202)  # Accepted
+</code></pre>
+<h2 id="production-setup">Production Setup</h2>
+<p><strong>1. Use production store (Redis):</strong></p>
+<pre><code class="language-python">from workflow_core.adapters.redis_store import RedisStore
+import redis.asyncio
+
+redis_client = redis.asyncio.from_url(&quot;redis://localhost&quot;)
+store = RedisStore(redis_client)
+runtime = Runtime(WORKFLOW, registry, store=store)
+</code></pre>
+<p><strong>2. Async views (Django 3.1+):</strong></p>
+<pre><code class="language-python">from asgiref.sync import sync_to_async
+
+class AsyncWorkflowViewSet(viewsets.ViewSet):
+    async def create(self, request):
+        &quot;&quot;&quot;DRF auto-wraps sync views; make async for await&quot;&quot;&quot;
+        context = await self.runtime.execute(
+            f&quot;exec-{uuid4()}&quot;,
+            input_data={&quot;input&quot;: request.data},
+        )
+        return Response(...)
+</code></pre>
+<p><strong>3. Logging &amp; monitoring:</strong></p>
+<pre><code class="language-python">class MonitoredViewSet(viewsets.ViewSet):
+    def create(self, request):
+        execution_id = f&quot;exec-{uuid4()}&quot;
+
+        # Log workflow start
+        logger.info(f&quot;Starting workflow {execution_id}&quot;, extra={
+            &quot;user_id&quot;: request.user.id,
+            &quot;workflow&quot;: &quot;create_user&quot;,
+        })
+
+        context = self.runtime.execute(execution_id, {...})
+
+        # Log completion
+        logger.info(f&quot;Completed workflow {execution_id}&quot;, extra={
+            &quot;status&quot;: context.data.get(&quot;response&quot;, {}).get(&quot;status&quot;),
+        })
+
+        return Response(...)
+</code></pre>
+<h2 id="summary">Summary</h2>
+<p><strong>workflow-core + DRF:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>DRF</th>
+<th>workflow-core</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Request parsing</td>
+<td>✅ Serializers</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Response formatting</td>
+<td>✅ Response class</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Authentication</td>
+<td>✅ Permissions</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Business logic</td>
+<td>—</td>
+<td>✅ Nodes</td>
+</tr>
+<tr>
+<td>Multi-step processes</td>
+<td>—</td>
+<td>✅ Workflows</td>
+</tr>
+<tr>
+<td>State persistence</td>
+<td>—</td>
+<td>✅ ExecutionStore</td>
+</tr>
+<tr>
+<td>Complex validation chains</td>
+<td>—</td>
+<td>✅ FormNode + Processors</td>
+</tr>
+</tbody>
+</table>
+<p>Use both: DRF for REST conventions, workflow-core for orchestration.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
