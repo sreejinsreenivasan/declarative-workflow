@@ -17,8 +17,7 @@ nav:
       - Defining Workflows: guides/defining-workflows.md
       - Custom Nodes: guides/custom-nodes.md
       - FastAPI Integration: guides/fastapi-integration.md
-      - Django Integration: guides/django-integration.md
-      - Django REST Framework: guides/django-drf-integration.md
+      - Django + DRF: guides/django-drf-integration.md
       - Error Handling: guides/error-handling.md
       - Events & Observability: guides/events.md
   - Reference:
