@@ -88,3 +88,32 @@ Present a plan and wait for explicit approval before modifying:
 - `src/workflow_core/entities/`
 - `src/workflow_core/runtime.py`
 - `src/workflow_core/nodes/protocol.py`
+
+---
+
+## Commits
+
+Format: `<type>: <subject>`
+Types: `feat` | `fix` | `refactor` | `docs` | `test` | `chore`
+Subject: lowercase, imperative mood, ≤72 chars, no trailing period.
+
+```
+feat: add redis persistence adapter
+fix: handle missing transition key in decision node
+chore: release 0.2.0
+```
+
+Never commit directly to `main`. Always run `poetry run pytest` before committing.
+
+---
+
+## Release Process
+
+1. All tests pass: `poetry run pytest`
+2. Bump version: `poetry version <patch|minor|major>`
+3. Commit: `git commit -m "chore: release X.Y.Z"`
+4. Tag: `git tag -a vX.Y.Z -m "vX.Y.Z"`
+5. Push: `git push origin main --tags`
+6. Build + publish: `poetry build && poetry publish`
+
+Never tag without a passing test suite. Never publish without a tag.
