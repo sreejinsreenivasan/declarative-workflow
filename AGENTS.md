@@ -9,15 +9,19 @@ and mounted to web frameworks via thin adapters.
 ## Architecture
 
 ```
-src/workflow_core/entities/   → domain entities; pure (stdlib + Pydantic only)
-src/workflow_core/execution/  → pipeline executor and state manager; pure
-src/workflow_core/nodes/      → node protocol + built-in implementations
-src/workflow_core/adapters/   → FastAPI + Redis; only place framework imports appear
-tests/                        → pytest suites mirroring src/ layout
+src/workflow_core/
+  workflow.py  context.py  result.py  event.py   ← domain models; pure (stdlib + Pydantic only)
+  runtime.py   registry.py  store.py  protocol.py ← execution engine and contracts; pure
+  processors.py                                   ← reusable async processors
+  nodes/                                          ← built-in nodes (form, decision, http, ...)
+  ui/                                             ← UI component schema + template loader
+  adapters/                                       ← FastAPI, Redis, OpenTelemetry, FileStore;
+                                                    framework and I/O imports live here only
+tests/                                            ← pytest suites (root = runtime/integration)
 ```
 
-Dependency direction is strict and one-way: `adapters/` → `nodes/` → `entities/` + `execution/`.
-Inner layers never import from outer layers.
+Dependency direction is strict and one-way: `adapters/` → `nodes/` → core modules.
+Core modules never import from `nodes/` or `adapters/`.
 
 Detailed rules per layer:
 
@@ -92,7 +96,7 @@ A PR with new logic and no prior failing test does not follow TDD — send it ba
 Domain entities are Pydantic `BaseModel` instances with `model_config = ConfigDict(frozen=True)`.
 Use `model.model_copy(update={...})` to derive modified instances — never mutate in place.
 
-`ExecutionContext` is append-only. Nodes add to `context.data`; they never delete or
+`Context` is append-only. Nodes add to `context.data`; they never delete or
 overwrite keys set by earlier nodes.
 
 ---
@@ -181,17 +185,17 @@ Every node — built-in or user-defined — must satisfy `NodeProtocol`:
 
 ```python
 class MyNode:
-    async def execute(self, inputs: NodeInputs) -> NodeResult:
+    async def run(self, context: Context, params: dict[str, Any]) -> Result | NodeError:
         ...
 ```
 
 A node must:
 - Be a pure async executor with no global or shared mutable state
-- Return a typed `NodeResult` (or `FailedNodeResult`)
+- Return a `Result` (with a `transition` the node definition declares) or a `NodeError`
 - Never call another node directly — the runtime drives sequencing
-- Never mutate `ExecutionContext` directly — return output data in `NodeResult`
+- Never mutate `Context` directly — return output data in `Result`
 
-Full contract in `workflow_core/core/nodes/AGENTS.md`.
+Full contract in `src/workflow_core/protocol.py` and `.claude/layers/core-nodes.md`.
 
 ---
 
@@ -199,7 +203,7 @@ Full contract in `workflow_core/core/nodes/AGENTS.md`.
 
 1. **A node executes only once per path** — executor checks node status before execution
 2. **Context is append-only** — nodes add to `context.data`, never overwrite prior keys
-3. **WorkflowDefinition is never mutated during execution** — all state lives in `ExecutionContext`
+3. **`Workflow` is never mutated during execution** — all state lives in `Context`
 4. **State is persisted before and after each node** — repository called at both checkpoints
 
 ---

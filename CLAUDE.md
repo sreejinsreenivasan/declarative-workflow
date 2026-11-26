@@ -51,15 +51,19 @@ poetry publish --dry-run
 ## Architecture
 
 ```
-src/workflow_core/entities/   ← domain entities; pure (stdlib + Pydantic only)
-src/workflow_core/execution/  ← pipeline executor and state manager; pure
-src/workflow_core/nodes/      ← node protocol + built-in implementations
-src/workflow_core/adapters/   ← FastAPI + Redis; framework imports live here only
-tests/                        ← pytest suites mirroring src/ layout
+src/workflow_core/
+  workflow.py  context.py  result.py  event.py   ← domain models; pure (stdlib + Pydantic only)
+  runtime.py   registry.py  store.py  protocol.py ← execution engine and contracts; pure
+  processors.py                                   ← reusable async processors
+  nodes/                                          ← built-in nodes (form, decision, http, ...)
+  ui/                                             ← UI component schema + template loader
+  adapters/                                       ← FastAPI, Redis, OpenTelemetry, FileStore;
+                                                    framework and I/O imports live here only
+tests/                                            ← pytest suites (root = runtime/integration)
 ```
 
 Dependency direction is strict and one-way:
-`adapters/` → `nodes/` → `entities/` + `execution/`. Inner layers never import from outer.
+`adapters/` → `nodes/` → core modules. Core modules never import from `nodes/` or `adapters/`.
 
 ---
 
@@ -67,27 +71,27 @@ Dependency direction is strict and one-way:
 
 | Path | Role |
 |------|------|
-| `src/workflow_core/runtime.py` | `WorkflowRuntime` — main public entry point |
-| `src/workflow_core/registry.py` | `NodeRegistry` — maps type strings to node classes |
-| `src/workflow_core/execution/executor.py` | `PipelineExecutor` — sync + async pipeline runner |
-| `src/workflow_core/execution/state_manager.py` | Pure state transition functions |
-| `src/workflow_core/entities/workflow.py` | `WorkflowDefinition` — top-level domain object |
-| `src/workflow_core/entities/context.py` | `ExecutionContext` — immutable execution state carrier |
-| `src/workflow_core/entities/result.py` | `NodeResult`, `FailedNodeResult` — typed outputs |
-| `src/workflow_core/nodes/protocol.py` | `NodeProtocol` — contract every node must satisfy |
-| `src/workflow_core/nodes/` | Built-in nodes: form, decision, http, transform, persist, response |
-| `src/workflow_core/adapters/fastapi.py` | `workflow_router()` — mounts workflow to FastAPI app |
-| `src/workflow_core/adapters/redis.py` | Redis execution state repository |
+| `src/workflow_core/runtime.py` | `Runtime` — executes, suspends, resumes; sets `Context.status` |
+| `src/workflow_core/workflow.py` | `Workflow`, `Node` — declarative definition, validated transitions |
+| `src/workflow_core/context.py` | `Context`, `ExecutionStatus` — immutable execution state |
+| `src/workflow_core/result.py` | `Result`, `NodeError` — typed node outputs |
+| `src/workflow_core/registry.py` | `Registry` — maps type strings to node classes or factories |
+| `src/workflow_core/protocol.py` | `NodeProtocol` — contract every node must satisfy |
+| `src/workflow_core/store.py` | `ExecutionStore` protocol + `InMemoryStore` |
+| `src/workflow_core/event.py` | `Event`, `EventType` — lifecycle events |
+| `src/workflow_core/nodes/` | Built-in nodes: form, decision, http, transform, persist, response, ui |
+| `src/workflow_core/adapters/fastapi.py` | `api_router()`, `ui_router()` — mount a runtime to FastAPI |
+| `src/workflow_core/adapters/redis_store.py` | Redis execution store |
+| `src/workflow_core/adapters/file_store.py` | `FileStore` — one JSON file per execution |
 
 ---
 
 ## Approval Gate
 
 Present a plan and wait for explicit approval before modifying:
-- `src/workflow_core/execution/`
-- `src/workflow_core/entities/`
 - `src/workflow_core/runtime.py`
-- `src/workflow_core/nodes/protocol.py`
+- `src/workflow_core/context.py`, `workflow.py`, `result.py`, `event.py`, `store.py`
+- `src/workflow_core/protocol.py`
 
 ---
 
