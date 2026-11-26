@@ -1,4 +1,4 @@
-from workflow_core.context import Context
+from workflow_core.context import Context, ExecutionStatus
 from workflow_core.event import Event, EventType
 from workflow_core.processors import (
     Processor,
@@ -24,6 +24,7 @@ __all__ = [
     "Workflow",
     "Node",
     "Context",
+    "ExecutionStatus",
     "Result",
     "NodeError",
     "Event",

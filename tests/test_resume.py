@@ -1,6 +1,6 @@
 import pytest
 
-from workflow_core import InMemoryStore, Runtime
+from workflow_core import ExecutionStatus, InMemoryStore, Runtime
 from workflow_core.context import Context
 from workflow_core.registry import Registry
 from workflow_core.result import NodeError, Result
@@ -144,7 +144,9 @@ async def test_success_transition_does_not_suspend():
     context = await runtime.execute("e1")
 
     assert context.node is None           # workflow completed normally
-    assert await store.load("e1") is None  # nothing saved
+    saved = await store.load("e1")         # finished runs are persisted too (since 0.2)
+    assert saved is not None
+    assert saved.status == ExecutionStatus.COMPLETED
 
 
 async def test_no_store_suspend_does_not_fail():
